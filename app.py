@@ -32,6 +32,8 @@ translations = {
         'target_lang': 'שפת התגובה המבוקשת',
         'context_label': 'קונטקסט (איך זה התחיל?)',
         'context_ph': 'למשל: ויכוח על המצור ב-X',
+        'link_label': 'קישור לפוסט (Facebook, X, Instagram...)',
+        'link_ph': 'הדביקו כאן את הלינק לפוסט',
         'troll_label': 'מה הטרול כתב?',
         'troll_ph': 'הדביקו כאן את התגובה...',
         'upload_label': 'העלה צילום מסך (אופציונלי)',
@@ -51,6 +53,8 @@ translations = {
         'target_lang': 'Target Response Language',
         'context_label': 'Context (How did it start?)',
         'context_ph': 'e.g., Argument about the blockade on X',
+        'link_label': 'Link to post (Facebook, X, Instagram...)',
+        'link_ph': 'Paste the URL here',
         'troll_label': 'What did the troll write?',
         'troll_ph': 'Paste the comment here...',
         'upload_label': 'Upload screenshot (Optional)',
@@ -117,29 +121,39 @@ st.markdown(f"<h2 style='text-align: center;'>{t['response_level']}</h2>", unsaf
 intensity_labels = [t['mild'], t['spicy'], t['atomic']]
 intensity = st.radio("intensity", intensity_labels, horizontal=True, label_visibility="collapsed")
 
-# 3. קונטקסט ותוכן
+# 3. קונטקסט, לינק ותוכן
 st.markdown("---")
+# שדה קונטקסט
 st.markdown(f"<p style='text-align: {t['align']}; font-weight: bold;'>{t['context_label']}</p>", unsafe_allow_html=True)
 context_input = st.text_input("ctx", placeholder=t['context_ph'], label_visibility="collapsed")
 
+# שדה לינק (חדש!)
+st.markdown(f"<p style='text-align: {t['align']}; font-weight: bold;'>{t['link_label']}</p>", unsafe_allow_html=True)
+post_link = st.text_input("link", placeholder=t['link_ph'], label_visibility="collapsed")
+
+# שדה תגובת טרול
 st.markdown(f"<p style='text-align: {t['align']}; font-weight: bold;'>{t['troll_label']}</p>", unsafe_allow_html=True)
 troll_input = st.text_area("troll", placeholder=t['troll_ph'], label_visibility="collapsed", height=100)
 
 uploaded_file = st.file_uploader(t['upload_label'], type=['png', 'jpg', 'jpeg'])
 
-# בחירת שפת תגובה - הועבר לכאן והפך לרדיו
+# 4. שפת תגובה
 st.markdown(f"<p style='text-align: center; margin-top:20px; font-weight: bold;'>{t['target_lang']}</p>", unsafe_allow_html=True)
 target_lang = st.radio("target_lang", ["Hebrew", "English", "Arabic", "Russian"], horizontal=True, label_visibility="collapsed")
 
-st.write("") # רווח לפני הכפתור
+st.write("") 
 
 if st.button(t['fire_btn'], key="fire"):
     if troll_input:
         with st.spinner(t['analyzing']):
             try:
+                # הוספת הלינק לפרומפט
+                link_info = f"Post Link: {post_link}" if post_link else "No link provided."
+                
                 prompt_content = [
                     f"Instruction: {PERSONAS[st.session_state.persona]}. "
                     f"Intensity: {intensity}. Context: {context_input}. "
+                    f"Platform Info: {link_info}. "
                     f"Troll wrote: {troll_input}. "
                     f"IMPORTANT: Respond ONLY in {target_lang}."
                 ]
@@ -156,7 +170,7 @@ if st.button(t['fire_btn'], key="fire"):
     else:
         st.warning(t['input_error'])
 
-# 4. ארכיון
+# 5. ארכיון
 if st.session_state.history:
     st.markdown("---")
     st.markdown(f"<h2 style='text-align: center;'>{t['history_title']}</h2>", unsafe_allow_html=True)
