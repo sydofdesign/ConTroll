@@ -20,7 +20,7 @@ if 'lang' not in st.session_state:
 if 'history' not in st.session_state:
     st.session_state.history = []
 if 'persona' not in st.session_state:
-    st.session_state.persona = "The Savage (הציני)"
+    st.session_state.persona = "The Savage"
 
 # --- מילון תרגומים ---
 translations = {
@@ -87,42 +87,37 @@ st.markdown(f"""
     </style>
     """, unsafe_allow_html=True)
 
-# --- הגדרת AI (גרסה חסינה) ---
+# --- הגדרת AI ---
 API_KEY = "AIzaSyC1JvhUdZZxelkH09dDLl6b8HaEQTqK89A"
 genai.configure(api_key=API_KEY)
+model = genai.GenerativeModel('gemini-1.5-flash')
 
-# פונקציה שמנסה למצוא מודל שעובד
-def get_model():
-    # פשוט וקל - רוב הסיכויים שזה מה שעובד בגרסה הנוכחית
-    return genai.GenerativeModel('gemini-1.5-flash')
-
-model = get_model()
-
+# הגדרת הפרסונות המורחבת
 PERSONAS = {
-    "The Savage (הציני)": "Witty, cynical, biting sarcasm. Focus on logic or national failure.",
-    "The Historian (הפרופסור)": "Academic, factual, corrects lies with historical dates/facts.",
-    "The Theological Glitch (התיאולוג)": "Expert in Islam. Uses Quranic verses like 5:21 to prove Jewish rights."
+    "The Savage": "Witty, cynical, biting sarcasm. Focus on exposing hypocrisy and edited videos.",
+    "The Historian": "Academic and factual. Mentions PA control over West Bank and Israel's right to defend borders.",
+    "The Theological Glitch": "Expert in Islam. Uses Quranic sources to support Israel's historical rights.",
+    "The Nazi Hunter": "Cold and direct. Crushes anti-semitism and Neo-Nazi rhetoric with historical shame and facts. Do not debate, just destroy their ideology.",
+    "The Mirror Troll": "Reverse psychology and trolling the troll. Use humor, nonsense, and memes in text. Make them look ridiculous and small."
 }
 
 # --- ממשק המשתמש ---
 st.image("logoCT.png", width=180)
 
-# 1. פרסונה
+# 1. בחירת פרסונה (עכשיו 5 עמודות)
 st.markdown(f"<h2 style='text-align: center;'>{t['select_persona']}</h2>", unsafe_allow_html=True)
-c1, c2, c3 = st.columns(3)
-with c1:
-    st.markdown('<div class="persona-card">Savage</div>', unsafe_allow_html=True)
-    if st.button("The Savage", use_container_width=True): st.session_state.persona = "The Savage (הציני)"
-with c2:
-    st.markdown('<div class="persona-card">Historian</div>', unsafe_allow_html=True)
-    if st.button("The Historian", use_container_width=True): st.session_state.persona = "The Historian (הפרופסור)"
-with c3:
-    st.markdown('<div class="persona-card">Theology</div>', unsafe_allow_html=True)
-    if st.button("The Theology", use_container_width=True): st.session_state.persona = "The Theological Glitch (התיאולוג)"
+cols = st.columns(5)
+persona_keys = list(PERSONAS.keys())
+
+for i, key in enumerate(persona_keys):
+    with cols[i]:
+        st.markdown(f'<div class="persona-card" style="height: 100px; font-size: 0.8rem;">{key}</div>', unsafe_allow_html=True)
+        if st.button(key, use_container_width=True):
+            st.session_state.persona = key
 
 st.markdown(f"<p style='text-align: center; color: #2E35C2;'>{t['chosen_label']} <b>{st.session_state.persona}</b></p>", unsafe_allow_html=True)
 
-# 2. רמה
+# 2. רמת תגובה
 st.markdown(f"<h2 style='text-align: center;'>{t['response_level']}</h2>", unsafe_allow_html=True)
 intensity_labels = [t['mild'], t['spicy'], t['atomic']]
 intensity = st.radio("intensity", intensity_labels, horizontal=True, label_visibility="collapsed")
@@ -144,16 +139,18 @@ uploaded_file = st.file_uploader(t['upload_label'], type=['png', 'jpg', 'jpeg'])
 st.markdown(f"<p style='text-align: center; margin-top:20px; font-weight: bold;'>{t['target_lang']}</p>", unsafe_allow_html=True)
 target_lang = st.radio("target_lang", ["Hebrew", "English", "Arabic", "Russian"], horizontal=True, label_visibility="collapsed")
 
-st.write("") 
-
 if st.button(t['fire_btn'], key="fire"):
     if troll_input:
         with st.spinner(t['analyzing']):
             try:
-                # פרומפט
-                p_text = f"You are {PERSONAS[st.session_state.persona]}. Intensity: {intensity}. Context: {context_input}. Link: {post_link}. Troll text: {troll_input}. Response language: {target_lang}."
+                p_text = (
+                    f"Instruction: {PERSONAS[st.session_state.persona]}. "
+                    f"Intensity: {intensity}. "
+                    f"Context: {context_input}. Link: {post_link}. "
+                    f"Troll wrote: {troll_input}. "
+                    f"IMPORTANT: Respond ONLY in {target_lang}."
+                )
                 
-                # יצירת תגובה
                 if uploaded_file:
                     img = Image.open(uploaded_file)
                     response = model.generate_content([p_text, img])
@@ -161,7 +158,6 @@ if st.button(t['fire_btn'], key="fire"):
                     response = model.generate_content(p_text)
                 
                 st.markdown("---")
-                st.markdown(f"### {t['result_title']}")
                 st.success(response.text)
                 st.session_state.history.insert(0, {"troll": troll_input, "response": response.text, "lang": target_lang})
             except Exception as e:
