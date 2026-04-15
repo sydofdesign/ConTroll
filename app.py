@@ -87,10 +87,15 @@ st.markdown(f"""
     </style>
     """, unsafe_allow_html=True)
 
-# --- הגדרת AI ---
+# --- הגדרת AI (תיקון השגיאה כאן) ---
 API_KEY = "AIzaSyC1JvhUdZZxelkH09dDLl6b8HaEQTqK89A" 
 genai.configure(api_key=API_KEY)
-model = genai.GenerativeModel('gemini-1.5-flash')
+
+# ניסיון להשתמש במודל gemini-pro שהוא היציב ביותר בגרסה הנוכחית
+try:
+    model = genai.GenerativeModel('gemini-1.5-flash-latest')
+except:
+    model = genai.GenerativeModel('gemini-pro')
 
 PERSONAS = {
     "The Savage (הציני)": "Witty, cynical, biting sarcasm. Focus on logic or national failure.",
@@ -123,15 +128,12 @@ intensity = st.radio("intensity", intensity_labels, horizontal=True, label_visib
 
 # 3. קונטקסט, לינק ותוכן
 st.markdown("---")
-# שדה קונטקסט
 st.markdown(f"<p style='text-align: {t['align']}; font-weight: bold;'>{t['context_label']}</p>", unsafe_allow_html=True)
 context_input = st.text_input("ctx", placeholder=t['context_ph'], label_visibility="collapsed")
 
-# שדה לינק (חדש!)
 st.markdown(f"<p style='text-align: {t['align']}; font-weight: bold;'>{t['link_label']}</p>", unsafe_allow_html=True)
 post_link = st.text_input("link", placeholder=t['link_ph'], label_visibility="collapsed")
 
-# שדה תגובת טרול
 st.markdown(f"<p style='text-align: {t['align']}; font-weight: bold;'>{t['troll_label']}</p>", unsafe_allow_html=True)
 troll_input = st.text_area("troll", placeholder=t['troll_ph'], label_visibility="collapsed", height=100)
 
@@ -147,26 +149,30 @@ if st.button(t['fire_btn'], key="fire"):
     if troll_input:
         with st.spinner(t['analyzing']):
             try:
-                # הוספת הלינק לפרומפט
                 link_info = f"Post Link: {post_link}" if post_link else "No link provided."
                 
-                prompt_content = [
+                # בניית הפרומפט
+                prompt_text = (
                     f"Instruction: {PERSONAS[st.session_state.persona]}. "
                     f"Intensity: {intensity}. Context: {context_input}. "
                     f"Platform Info: {link_info}. "
                     f"Troll wrote: {troll_input}. "
                     f"IMPORTANT: Respond ONLY in {target_lang}."
-                ]
-                if uploaded_file:
-                    prompt_content.append(Image.open(uploaded_file))
+                )
                 
-                response = model.generate_content(prompt_content)
+                # אם יש תמונה - משתמשים במבנה מולטי-מודאלי
+                if uploaded_file:
+                    img = Image.open(uploaded_file)
+                    response = model.generate_content([prompt_text, img])
+                else:
+                    response = model.generate_content(prompt_text)
+                
                 st.markdown("---")
                 st.markdown(f"### {t['result_title']}")
                 st.success(response.text)
                 st.session_state.history.insert(0, {"troll": troll_input, "response": response.text, "lang": target_lang})
             except Exception as e:
-                st.error(f"Error: {e}")
+                st.error(f"Error during generation: {e}")
     else:
         st.warning(t['input_error'])
 
