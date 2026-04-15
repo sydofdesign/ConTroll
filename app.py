@@ -14,7 +14,7 @@ def local_css(file_name):
 # --- הגדרות דף ---
 st.set_page_config(
     page_title="ConTroll - Anti-Troll Defense", 
-    page_icon="logo.png", # האייקון בלשונית יהיה הלוגו שלך
+    page_icon="logoCT.png", # האייקון בלשונית יהיה הלוגו שלך
     layout="centered"
 )
 
@@ -40,7 +40,7 @@ PERSONAS = {
 col_logo_1, col_logo_2, col_logo_3 = st.columns([1, 2, 1])
 with col_logo_2:
     try:
-        st.image("logo.png", use_container_width=True)
+        st.image("logoCT.png", use_container_width=True)
     except:
         st.title("🛡️ ConTroll") # גיבוי למקרה שהקובץ לא נטען
 
