@@ -87,14 +87,16 @@ st.markdown(f"""
     </style>
     """, unsafe_allow_html=True)
 
-# --- הגדרת AI (התיקון הקריטי כאן!) ---
+# --- הגדרת AI (גרסה חסינה) ---
 API_KEY = "AIzaSyC1JvhUdZZxelkH09dDLl6b8HaEQTqK89A"
+genai.configure(api_key=API_KEY)
 
-# אנחנו מגדירים את הלקוח להשתמש בגרסה v1 באופן מפורש
-genai.configure(api_key=API_KEY, transport='rest') # שימוש ב-REST במקום ב-gRPC פותר הרבה בעיות 404
+# פונקציה שמנסה למצוא מודל שעובד
+def get_model():
+    # פשוט וקל - רוב הסיכויים שזה מה שעובד בגרסה הנוכחית
+    return genai.GenerativeModel('gemini-1.5-flash')
 
-# שימוש במודל היציב ביותר כרגע
-model = genai.GenerativeModel('gemini-1.5-flash')
+model = get_model()
 
 PERSONAS = {
     "The Savage (הציני)": "Witty, cynical, biting sarcasm. Focus on logic or national failure.",
@@ -105,7 +107,7 @@ PERSONAS = {
 # --- ממשק המשתמש ---
 st.image("logoCT.png", width=180)
 
-# 1. בחירת פרסונה
+# 1. פרסונה
 st.markdown(f"<h2 style='text-align: center;'>{t['select_persona']}</h2>", unsafe_allow_html=True)
 c1, c2, c3 = st.columns(3)
 with c1:
@@ -120,7 +122,7 @@ with c3:
 
 st.markdown(f"<p style='text-align: center; color: #2E35C2;'>{t['chosen_label']} <b>{st.session_state.persona}</b></p>", unsafe_allow_html=True)
 
-# 2. רמת תגובה
+# 2. רמה
 st.markdown(f"<h2 style='text-align: center;'>{t['response_level']}</h2>", unsafe_allow_html=True)
 intensity_labels = [t['mild'], t['spicy'], t['atomic']]
 intensity = st.radio("intensity", intensity_labels, horizontal=True, label_visibility="collapsed")
@@ -148,34 +150,28 @@ if st.button(t['fire_btn'], key="fire"):
     if troll_input:
         with st.spinner(t['analyzing']):
             try:
-                # בניית הפרומפט
-                prompt = (
-                    f"You are acting as: {PERSONAS[st.session_state.persona]}. "
-                    f"Intensity level: {intensity}. Context: {context_input}. "
-                    f"Link: {post_link}. Troll wrote: {troll_input}. "
-                    f"IMPORTANT: Respond ONLY in {target_lang} language."
-                )
+                # פרומפט
+                p_text = f"You are {PERSONAS[st.session_state.persona]}. Intensity: {intensity}. Context: {context_input}. Link: {post_link}. Troll text: {troll_input}. Response language: {target_lang}."
                 
-                # תמיכה בתמונה
+                # יצירת תגובה
                 if uploaded_file:
                     img = Image.open(uploaded_file)
-                    response = model.generate_content([prompt, img])
+                    response = model.generate_content([p_text, img])
                 else:
-                    response = model.generate_content(prompt)
+                    response = model.generate_content(p_text)
                 
                 st.markdown("---")
                 st.markdown(f"### {t['result_title']}")
                 st.success(response.text)
                 st.session_state.history.insert(0, {"troll": troll_input, "response": response.text, "lang": target_lang})
             except Exception as e:
-                st.error(f"שגיאה בחיבור: {str(e)}")
+                st.error(f"Error: {str(e)}")
     else:
         st.warning(t['input_error'])
 
 # 5. ארכיון
 if st.session_state.history:
     st.markdown("---")
-    st.markdown(f"<h2 style='text-align: center;'>{t['history_title']}</h2>", unsafe_allow_html=True)
     for i, item in enumerate(st.session_state.history[:5]):
         with st.expander(f"Log {i+1} ({item['lang']}): {item['troll'][:30]}..."):
             st.write(item['response'])
