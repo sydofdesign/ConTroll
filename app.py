@@ -14,7 +14,7 @@ def local_css(file_name):
 # --- הגדרות דף ---
 st.set_page_config(
     page_title="ConTroll - Anti-Troll Defense", 
-    page_icon="logoCT.png", 
+    page_icon="logo.png", # האייקון בלשונית יהיה הלוגו שלך
     layout="centered"
 )
 
@@ -36,8 +36,15 @@ PERSONAS = {
 
 # --- ממשק המשתמש (UI) ---
 
-st.title("🛡️ ConTroll")
-st.markdown("### Neutralize trolls with intelligence")
+# הצגת הלוגו במרכז
+col_logo_1, col_logo_2, col_logo_3 = st.columns([1, 2, 1])
+with col_logo_2:
+    try:
+        st.image("logo.png", use_container_width=True)
+    except:
+        st.title("🛡️ ConTroll") # גיבוי למקרה שהקובץ לא נטען
+
+st.markdown("<h3 style='text-align: center;'>Neutralize trolls with intelligence</h3>", unsafe_allow_html=True)
 
 # תיבת קלט
 troll_input = st.text_area(
