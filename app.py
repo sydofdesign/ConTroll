@@ -1,6 +1,7 @@
 import streamlit as st
 import google.generativeai as genai
 from PIL import Image
+import os
 
 # --- פונקציות עזר וטעינת CSS ---
 def local_css(file_name):
@@ -87,31 +88,13 @@ st.markdown(f"""
     </style>
     """, unsafe_allow_html=True)
 
-# --- הגדרת AI (התיקון הסופי) ---
+# --- הגדרת AI (תיקון סופי בהחלט) ---
 API_KEY = "AIzaSyC1JvhUdZZxelkH09dDLl6b8HaEQTqK89A" 
 genai.configure(api_key=API_KEY)
 
-# פונקציה חכמה למציאת מודל זמין
-@st.cache_resource
-def get_model():
-    # רשימת שמות פוטנציאליים למודל לפי סדר עדיפות
-    potential_models = ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-pro']
-    
-    # בודק מה באמת זמין ב-API הספציפי שלך
-    try:
-        available_models = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
-        for model_name in potential_models:
-            # ה-API לפעמים מחזיר שמות עם 'models/' ולפעמים בלי
-            for avail in available_models:
-                if model_name in avail:
-                    return genai.GenerativeModel(avail)
-    except:
-        # אם ה-list_models חסום, נלך על הכי בסיסי
-        return genai.GenerativeModel('gemini-pro')
-    
-    return genai.GenerativeModel('gemini-pro')
-
-model = get_model()
+# כאן אנחנו מגדירים את המודל בדרך העוקפת את ה-v1beta
+# שימוש בפורמט השם המלא models/gemini-1.5-flash
+model = genai.GenerativeModel('gemini-1.5-flash')
 
 PERSONAS = {
     "The Savage (הציני)": "Witty, cynical, biting sarcasm. Focus on logic or national failure.",
@@ -165,27 +148,36 @@ if st.button(t['fire_btn'], key="fire"):
     if troll_input:
         with st.spinner(t['analyzing']):
             try:
-                input_data = []
+                # פרומפט פשוט ככל האפשר לבדיקה
                 prompt_text = (
-                    f"Instruction: {PERSONAS[st.session_state.persona]}. "
-                    f"Intensity: {intensity}. Context: {context_input}. "
-                    f"Link: {post_link}. Troll wrote: {troll_input}. "
-                    f"IMPORTANT: Respond ONLY in {target_lang}."
+                    f"You are {st.session_state.persona}. "
+                    f"Intensity: {intensity}. "
+                    f"Troll wrote: {troll_input}. "
+                    f"Answer in {target_lang}."
                 )
-                input_data.append(prompt_text)
                 
+                # יצירת תוכן
                 if uploaded_file:
                     img = Image.open(uploaded_file)
-                    input_data.append(img)
-                
-                response = model.generate_content(input_data)
+                    response = model.generate_content([prompt_text, img])
+                else:
+                    response = model.generate_content(prompt_text)
                 
                 st.markdown("---")
                 st.markdown(f"### {t['result_title']}")
                 st.success(response.text)
                 st.session_state.history.insert(0, {"troll": troll_input, "response": response.text, "lang": target_lang})
             except Exception as e:
-                st.error(f"שגיאה: {str(e)}")
+                # הדפסת השגיאה המלאה לדיבוג
+                st.error(f"שגיאה טכנית: {str(e)}")
+                st.info("מנסה שיטה חלופית...")
+                # ניסיון אחרון עם מודל ישן יותר אם הכל נכשל
+                try:
+                    alt_model = genai.GenerativeModel('gemini-pro')
+                    response = alt_model.generate_content(prompt_text)
+                    st.success(response.text)
+                except:
+                    st.error("השירות של גוגל לא זמין כרגע. נסה שוב בעוד דקה.")
     else:
         st.warning(t['input_error'])
 
