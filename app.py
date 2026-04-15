@@ -79,7 +79,7 @@ with col_lang_2:
 
 t = translations[st.session_state.lang]
 
-# הזרקת CSS לכיווניות
+# הזרקת CSS
 st.markdown(f"""
     <style>
     textarea, input {{ direction: {t['dir']} !important; text-align: {t['align']} !important; }}
@@ -87,11 +87,13 @@ st.markdown(f"""
     </style>
     """, unsafe_allow_html=True)
 
-# --- הגדרת AI (תיקון גרסה ידני למניעת 404) ---
+# --- הגדרת AI (התיקון הקריטי כאן!) ---
 API_KEY = "AIzaSyC1JvhUdZZxelkH09dDLl6b8HaEQTqK89A"
-genai.configure(api_key=API_KEY)
 
-# יצירת המודל עם שם מפורש
+# אנחנו מגדירים את הלקוח להשתמש בגרסה v1 באופן מפורש
+genai.configure(api_key=API_KEY, transport='rest') # שימוש ב-REST במקום ב-gRPC פותר הרבה בעיות 404
+
+# שימוש במודל היציב ביותר כרגע
 model = genai.GenerativeModel('gemini-1.5-flash')
 
 PERSONAS = {
@@ -103,7 +105,7 @@ PERSONAS = {
 # --- ממשק המשתמש ---
 st.image("logoCT.png", width=180)
 
-# 1. פרסונה
+# 1. בחירת פרסונה
 st.markdown(f"<h2 style='text-align: center;'>{t['select_persona']}</h2>", unsafe_allow_html=True)
 c1, c2, c3 = st.columns(3)
 with c1:
@@ -118,12 +120,12 @@ with c3:
 
 st.markdown(f"<p style='text-align: center; color: #2E35C2;'>{t['chosen_label']} <b>{st.session_state.persona}</b></p>", unsafe_allow_html=True)
 
-# 2. רמה
+# 2. רמת תגובה
 st.markdown(f"<h2 style='text-align: center;'>{t['response_level']}</h2>", unsafe_allow_html=True)
 intensity_labels = [t['mild'], t['spicy'], t['atomic']]
 intensity = st.radio("intensity", intensity_labels, horizontal=True, label_visibility="collapsed")
 
-# 3. קונטקסט, לינק ותוכן
+# 3. קונטקסט ותוכן
 st.markdown("---")
 st.markdown(f"<p style='text-align: {t['align']}; font-weight: bold;'>{t['context_label']}</p>", unsafe_allow_html=True)
 context_input = st.text_input("ctx", placeholder=t['context_ph'], label_visibility="collapsed")
@@ -148,10 +150,10 @@ if st.button(t['fire_btn'], key="fire"):
             try:
                 # בניית הפרומפט
                 prompt = (
-                    f"Instruction: {PERSONAS[st.session_state.persona]}. "
-                    f"Intensity: {intensity}. Context: {context_input}. "
-                    f"Troll text: {troll_input}. "
-                    f"Target Language: {target_lang}."
+                    f"You are acting as: {PERSONAS[st.session_state.persona]}. "
+                    f"Intensity level: {intensity}. Context: {context_input}. "
+                    f"Link: {post_link}. Troll wrote: {troll_input}. "
+                    f"IMPORTANT: Respond ONLY in {target_lang} language."
                 )
                 
                 # תמיכה בתמונה
@@ -166,7 +168,7 @@ if st.button(t['fire_btn'], key="fire"):
                 st.success(response.text)
                 st.session_state.history.insert(0, {"troll": troll_input, "response": response.text, "lang": target_lang})
             except Exception as e:
-                st.error(f"Error: {str(e)}")
+                st.error(f"שגיאה בחיבור: {str(e)}")
     else:
         st.warning(t['input_error'])
 
