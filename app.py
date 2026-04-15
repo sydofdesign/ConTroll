@@ -14,7 +14,7 @@ def local_css(file_name):
 # --- הגדרות דף ---
 st.set_page_config(
     page_title="ConTroll - Anti-Troll Defense", 
-    page_icon="🛡️",
+    page_icon="logoCT.png", 
     layout="centered"
 )
 
