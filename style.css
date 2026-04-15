@@ -93,3 +93,9 @@ div[data-baseweb="select"] {
     color: #2E35C2;
     font-weight: 700;
 }
+
+/* עיצוב לוגו */
+img {
+    filter: drop-shadow(0px 4px 8px rgba(46, 53, 194, 0.2));
+    margin-bottom: 20px;
+}
