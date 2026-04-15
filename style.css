@@ -1,0 +1,21 @@
+/* style.css */
+.stApp { background-color: #0B0E14; }
+h1 { color: #5BF0E0 !important; text-align: center; font-weight: 800; }
+.stButton > button {
+    background-color: #2E35C2 !important;
+    color: #FFFFFF !important;
+    border: 2px solid #5BF0E0;
+    border-radius: 12px;
+    font-weight: 700;
+    transition: all 0.3s ease;
+}
+.stButton > button:hover {
+    background-color: #5BF0E0 !important;
+    color: #0B0E14 !important;
+    box-shadow: 0 0 15px rgba(91, 240, 224, 0.4);
+}
+.stTextArea textarea {
+    background-color: #161B22 !important;
+    color: #FFFFFF !important;
+    border: 2px solid #2E35C2 !important;
+}
