@@ -1,6 +1,19 @@
 import streamlit as st
 import google.generativeai as genai
 
+# פונקציה לטעינת CSS מקובץ חיצוני
+def local_css(file_name):
+    with open(file_name) as f:
+        st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
+
+st.set_page_config(page_title="ConTroll - Anti-Troll Defense", page_icon="🛡️")
+
+# טעינת הסטייל
+try:
+    local_css("style.css")
+except:
+    pass # למקרה שהקובץ עדיין לא עלה
+
 # הגדרות עיצוב (Custom CSS) משופרות לנגישות וחווית משתמש
 st.set_page_config(page_title="ConTroll - Anti-Troll Defense", page_icon="🛡️")
 
