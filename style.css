@@ -1,57 +1,21 @@
-// Variables
-$primary: #2E35C2;
-$secondary: #5BF0E0;
-$bg-dark: #0B0E14;
-$bg-light: #FFFFFF;
-$text-white: #FFFFFF;
-$text-dark: #0B0E14;
-$card-bg: #161B22;
-
-// Mixins for repeated styles
-@mixin flex-center {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.stApp {
-  background-color: $bg-light;
-  font-family: 'Inter', sans-serif;
-
-  h1 {
-    color: $primary !important;
-    text-align: center;
-    font-weight: 800;
-    text-shadow: 0 0 10px rgba($secondary, 0.3);
-  }
-
-  // Buttons Styling
-  .stButton > button {
-    background-color: $primary !important;
-    color: $text-dark !important;
-    border: 2px solid $secondary;
+/* style.css */
+.stApp { background-color: #ffffff; }
+h1 { color: #5BF0E0 !important; text-align: center; font-weight: 800; }
+.stButton > button {
+    background-color: #2E35C2 !important;
+    color: #2E35C2 !important;
+    border: 2px solid #5BF0E0;
     border-radius: 12px;
-    height: 3.5rem;
     font-weight: 700;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-
-    &:hover {
-      background-color: $secondary !important;
-      color: $bg-dark !important;
-      transform: scale(1.02);
-      box-shadow: 0 0 20px rgba($secondary, 0.4);
-    }
-  }
-
-  // Text Inputs
-  .stTextArea textarea {
-    background-color: $card-bg !important;
-    color: $text-white !important;
-    border: 2px solid $primary !important;
-    border-radius: 10px;
-    
-    &:focus {
-      border-color: $secondary !important;
-    }
-  }
+    transition: all 0.3s ease;
+}
+.stButton > button:hover {
+    background-color: #5BF0E0 !important;
+    color: #0B0E14 !important;
+    box-shadow: 0 0 15px rgba(91, 240, 224, 0.4);
+}
+.stTextArea textarea {
+    background-color: #161B22 !important;
+    color: #FFFFFF !important;
+    border: 2px solid #2E35C2 !important;
 }
