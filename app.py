@@ -1,100 +1,110 @@
 import streamlit as st
 import google.generativeai as genai
 
-# --- פונקציות עזר ---
-
+# --- פונקציות עזר וטעינת CSS ---
 def local_css(file_name):
-    """טעינת קובץ CSS חיצוני"""
     try:
         with open(file_name) as f:
             st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
     except FileNotFoundError:
         pass
 
-# --- הגדרות דף ---
+# הגדרות דף
 st.set_page_config(
     page_title="ConTroll - Anti-Troll Defense", 
-    page_icon="logoCT.png", # האייקון בלשונית יהיה הלוגו שלך
+    page_icon="logoCT.png", 
     layout="centered"
 )
 
-# טעינת העיצוב (Light Mode שקידדנו ב-style.css)
+# טעינת העיצוב מקובץ ה-CSS
 local_css("style.css")
 
 # --- הגדרת AI ---
-# מפתח ה-API שלך
 API_KEY = "AIzaSyC1JvhUdZZxelkH09dDLl6b8HaEQTqK89A" 
 genai.configure(api_key=API_KEY)
-model = genai.GenerativeModel('gemini-1.5-flash') # שימוש במודל עדכני ומהיר
+model = genai.GenerativeModel('gemini-1.5-flash')
 
-# --- הגדרת הפרסונות ---
+# הגדרת הפרסונות
 PERSONAS = {
-    "The Savage (הציני האכזרי)": "You are a witty, cynical Israeli expert. Your goal is to destroy internet trolls with short, biting, and sarcastic comebacks. Focus on their lack of logic, economic failures, or personal obsession. Be extremely insulting but don't use forbidden curse words.",
-    "The Historian (הפרופסור)": "You are an expert in history and geopolitics. Correct historical lies with cold, hard facts. Use terms like 'Indigenous' and mention that there was never a sovereign Palestinian state. Tone: academic, superior, and condescending.",
-    "The Theological Glitch (התיאולוג)": "You are an expert in Islam. When a Muslim troll attacks Israel, use quotes from Islamic sources (like Surah 5:21) to prove the land belongs to Jews according to the Quran. Make them feel like they don't know their own religion."
+    "The Savage (הציני)": "You are a witty, cynical Israeli expert. Destroy trolls with biting sarcasm. Keep it short.",
+    "The Historian (הפרופסור)": "Expert in history. Correct lies with cold, hard facts about Israel's history.",
+    "The Theological Glitch (התיאולוג)": "Expert in Islam. Use Islamic sources like Quran 5:21 to prove the land belongs to Jews."
 }
 
-# --- ממשק המשתמש (UI) ---
+# --- ממשק המשתמש (UI) לפי התבנית ---
 
-# הצגת הלוגו במרכז
-col_logo_1, col_logo_2, col_logo_3 = st.columns([1, 2, 1])
-with col_logo_2:
-    try:
-        st.image("logoCT.png", use_container_width=True)
-    except:
-        st.title("🛡️ ConTroll") # גיבוי למקרה שהקובץ לא נטען
+# לוגו מרכזי
+col_l1, col_l2, col_l3 = st.columns([1, 1, 1])
+with col_l2:
+    st.image("logoCT.png", use_container_width=True)
 
-st.markdown("<h3 style='text-align: center;'>Neutralize trolls with intelligence</h3>", unsafe_allow_html=True)
+# 1. בחירת פרסונה
+st.markdown("<h2 style='text-align: center;'>בחירת פרסונה</h2>", unsafe_allow_html=True)
 
-# תיבת קלט
-troll_input = st.text_area(
-    "מה הטרול כתב?", 
-    placeholder="הדבק כאן את הטקסט המטופש שלהם...",
-    height=150
+col1, col2, col3 = st.columns(3)
+
+# שימוש ב-Session State כדי לנהל בחירה יחידה של פרסונה
+if 'persona' not in st.session_state:
+    st.session_state.persona = "The Savage (הציני)"
+
+with col1:
+    st.markdown('<div class="persona-card">דמות</div>', unsafe_allow_html=True)
+    if st.button("The Savage\n(הציני)", use_container_width=True):
+        st.session_state.persona = "The Savage (הציני)"
+
+with col2:
+    st.markdown('<div class="persona-card">דמות</div>', unsafe_allow_html=True)
+    if st.button("The Historian\n(הפרופסור)", use_container_width=True):
+        st.session_state.persona = "The Historian (הפרופסור)"
+
+with col3:
+    st.markdown('<div class="persona-card">דמות</div>', unsafe_allow_html=True)
+    if st.button("The Theological Glitch\n(התיאולוג)", use_container_width=True):
+        st.session_state.persona = "The Theological Glitch (התיאולוג)"
+
+st.markdown(f"<p style='text-align: center; color: #2E35C2; font-weight: bold;'>נבחר: {st.session_state.persona}</p>", unsafe_allow_html=True)
+
+# 2. רמת תגובה
+st.markdown("<h2 style='text-align: center;'>רמת תגובה</h2>", unsafe_allow_html=True)
+intensity = st.radio(
+    "", 
+    ["תהיה עדין", "תהיה נוקשה", "תהיה אטומי"], 
+    horizontal=True, 
+    label_visibility="collapsed"
 )
 
-# בחירת פרסונה ורמת חריפות בשורה אחת
-col1, col2 = st.columns(2)
-with col1:
-    persona_name = st.selectbox("בחר כלי נשק:", list(PERSONAS.keys()))
-with col2:
-    intensity = st.select_slider(
-        "רמת חריפות:", 
-        options=["Low", "Medium", "Atomic"]
-    )
+# 3. תיבת קלט
+st.markdown("<p style='text-align: right; margin-bottom: 5px;'>מה הטרול כתב?</p>", unsafe_allow_html=True)
+troll_input = st.text_area(
+    "", 
+    placeholder="הדביקו כאן את התגובה המטופשת שלהם", 
+    label_visibility="collapsed",
+    height=100
+)
 
 st.write("") # רווח
 
-# כפתור ההפעלה
-if st.button("NEUTRALIZE TROLL 🚀"):
+# כפתור שליחה מרכזי
+if st.button("שגר הגנה! 🚀", key="fire"):
     if troll_input:
-        with st.spinner('Calculating high-precision burn...'):
+        with st.spinner('מנתח את הטרול...'):
             try:
-                # הכנת הפרומפט ל-AI
-                system_instruction = PERSONAS[persona_name]
+                system_instruction = PERSONAS[st.session_state.persona]
                 full_prompt = (
-                    f"System Instruction: {system_instruction}\n"
-                    f"Intensity Level: {intensity}\n"
-                    f"Troll's Comment: {troll_input}\n\n"
+                    f"System: {system_instruction}\n"
+                    f"Intensity: {intensity}\n"
+                    f"Troll wrote: {troll_input}\n\n"
                     f"Response (English/Hebrew):"
                 )
-                
-                # יצירת התשובה
                 response = model.generate_content(full_prompt)
                 
-                # הצגת התוצאה
                 st.markdown("---")
-                st.markdown("### 🎯 ConTroll Result:")
+                st.markdown("### 🎯 התוצאה:")
                 st.success(response.text)
-                
-                # טיפ למשתמש
-                st.info("💡 העתק את הטקסט למעלה והדבק אותו בתגובה לטרול.")
-                
             except Exception as e:
-                st.error(f"שגיאה בחיבור ל-AI: {e}")
+                st.error(f"שגיאה: {e}")
     else:
-        st.warning("חביבי, אין תגובה - אין הגנה. הדבק טקסט קודם.")
+        st.warning("נא להזין טקסט לפני השיגור.")
 
 # פוטר
-st.markdown("<br><br><hr>", unsafe_allow_html=True)
-st.markdown("<p class='footer-text'>AM YISRAEL CHAI 🇮🇱</p>", unsafe_allow_html=True)
+st.markdown("<br><hr><p style='text-align: center; color: #2E35C2; font-weight: bold;'>AM YISRAEL CHAI 🇮🇱</p>", unsafe_allow_html=True)
