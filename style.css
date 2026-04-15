@@ -1,21 +1,104 @@
-/* style.css */
-.stApp { background-color: #ffffff; }
-h1 { color: #5BF0E0 !important; text-align: center; font-weight: 800; }
-.stButton > button {
-    background-color: #2E35C2 !important;
-    color: #2E35C2 !important;
-    border: 2px solid #5BF0E0;
-    border-radius: 12px;
-    font-weight: 700;
-    transition: all 0.3s ease;
+/* style.css - ConTroll UI Design */
+
+/* הגדרות רקע וגוף האפליקציה */
+.stApp {
+    background-color: #0B0E14;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
-.stButton > button:hover {
-    background-color: #5BF0E0 !important;
-    color: #0B0E14 !important;
-    box-shadow: 0 0 15px rgba(91, 240, 224, 0.4);
+
+/* כותרת ראשית (טורקיז) */
+h1 {
+    color: #5BF0E0 !important;
+    text-align: center;
+    font-weight: 800;
+    font-size: 3rem !important;
+    text-shadow: 0px 4px 10px rgba(91, 240, 224, 0.2);
+    margin-bottom: 0px !important;
 }
+
+/* כותרת משנה */
+h3 {
+    color: #FFFFFF !important;
+    opacity: 0.9;
+    font-weight: 400;
+    font-size: 1.2rem !important;
+}
+
+/* תוויות של שדות קלט (Labels) */
+label {
+    color: #FFFFFF !important;
+    font-weight: 600 !important;
+    margin-bottom: 8px !important;
+}
+
+/* תיבת הטקסט (Text Area) */
 .stTextArea textarea {
     background-color: #161B22 !important;
     color: #FFFFFF !important;
     border: 2px solid #2E35C2 !important;
+    border-radius: 12px !important;
+    padding: 15px !important;
+    font-size: 1rem !important;
+    transition: border-color 0.3s ease;
+}
+
+.stTextArea textarea:focus {
+    border-color: #5BF0E0 !important;
+    box-shadow: 0 0 10px rgba(91, 240, 224, 0.2);
+}
+
+/* עיצוב כפתור ההפעלה */
+.stButton > button {
+    background-color: #2E35C2 !important;
+    color: #FFFFFF !important;
+    border: 2px solid #5BF0E0 !important;
+    border-radius: 12px !important;
+    height: 3.5rem !important;
+    font-size: 1.1rem !important;
+    font-weight: 700 !important;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 20px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.stButton > button:hover {
+    background-color: #5BF0E0 !important;
+    color: #0B0E14 !important;
+    border: 2px solid #FFFFFF !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(91, 240, 224, 0.4);
+}
+
+.stButton > button:active {
+    transform: translateY(0px);
+}
+
+/* עיצוב תיבת התוצאה (Success Box) */
+.stSuccess {
+    background-color: #161B22 !important;
+    color: #5BF0E0 !important;
+    border: 1px solid #5BF0E0 !important;
+    border-left: 6px solid #5BF0E0 !important;
+    border-radius: 8px !important;
+    padding: 20px !important;
+    font-size: 1.1rem !important;
+}
+
+/* עיצוב סליידר (Slider) ותיבות בחירה (Selectbox) */
+div[data-baseweb="select"], .stSelectbox {
+    border-radius: 10px !important;
+}
+
+/* פס הפרדה */
+hr {
+    border-color: rgba(91, 240, 224, 0.2) !important;
+}
+
+/* טקסט תחתון (Footer) */
+.footer-text {
+    text-align: center;
+    color: #5BF0E0;
+    font-weight: 700;
+    letter-spacing: 2px;
 }
