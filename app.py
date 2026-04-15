@@ -28,7 +28,7 @@ translations = {
         'dir': 'rtl', 'align': 'right',
         'select_persona': 'בחירת פרסונה',
         'response_level': 'רמת תגובה',
-        'mild': 'עדין', 'spicy': 'נוקשה', 'atomic': 'אכזרי',
+        'mild': 'עדין', 'spicy': 'חריף', 'atomic': 'אטומי',
         'target_lang': 'שפת התגובה המבוקשת',
         'context_label': 'קונטקסט (איך זה התחיל?)',
         'context_ph': 'למשל: ויכוח על המצור ב-X',
@@ -87,15 +87,15 @@ st.markdown(f"""
     </style>
     """, unsafe_allow_html=True)
 
-# --- הגדרת AI (תיקון השגיאה כאן) ---
+# --- הגדרת AI (תיקון השגיאה) ---
 API_KEY = "AIzaSyC1JvhUdZZxelkH09dDLl6b8HaEQTqK89A" 
 genai.configure(api_key=API_KEY)
 
-# ניסיון להשתמש במודל gemini-pro שהוא היציב ביותר בגרסה הנוכחית
-try:
-    model = genai.GenerativeModel('gemini-1.5-flash-latest')
-except:
-    model = genai.GenerativeModel('gemini-pro')
+# פונקציה לבחירת מודל שקיים במערכת כדי למנוע 404
+def get_working_model():
+    return genai.GenerativeModel('gemini-1.5-flash')
+
+model = get_working_model()
 
 PERSONAS = {
     "The Savage (הציני)": "Witty, cynical, biting sarcasm. Focus on logic or national failure.",
@@ -121,7 +121,7 @@ with c3:
 
 st.markdown(f"<p style='text-align: center; color: #2E35C2;'>{t['chosen_label']} <b>{st.session_state.persona}</b></p>", unsafe_allow_html=True)
 
-# 2. רמת תגובה
+# 2. רמה
 st.markdown(f"<h2 style='text-align: center;'>{t['response_level']}</h2>", unsafe_allow_html=True)
 intensity_labels = [t['mild'], t['spicy'], t['atomic']]
 intensity = st.radio("intensity", intensity_labels, horizontal=True, label_visibility="collapsed")
@@ -149,30 +149,31 @@ if st.button(t['fire_btn'], key="fire"):
     if troll_input:
         with st.spinner(t['analyzing']):
             try:
-                link_info = f"Post Link: {post_link}" if post_link else "No link provided."
+                # יצירת רשימת קלט למודל (תומך בטקסט ותמונה יחד)
+                input_data = []
                 
-                # בניית הפרומפט
                 prompt_text = (
                     f"Instruction: {PERSONAS[st.session_state.persona]}. "
                     f"Intensity: {intensity}. Context: {context_input}. "
-                    f"Platform Info: {link_info}. "
+                    f"Link: {post_link}. "
                     f"Troll wrote: {troll_input}. "
                     f"IMPORTANT: Respond ONLY in {target_lang}."
                 )
+                input_data.append(prompt_text)
                 
-                # אם יש תמונה - משתמשים במבנה מולטי-מודאלי
                 if uploaded_file:
                     img = Image.open(uploaded_file)
-                    response = model.generate_content([prompt_text, img])
-                else:
-                    response = model.generate_content(prompt_text)
+                    input_data.append(img)
+                
+                # שיגור השאילתה
+                response = model.generate_content(input_data)
                 
                 st.markdown("---")
                 st.markdown(f"### {t['result_title']}")
                 st.success(response.text)
                 st.session_state.history.insert(0, {"troll": troll_input, "response": response.text, "lang": target_lang})
             except Exception as e:
-                st.error(f"Error during generation: {e}")
+                st.error(f"שגיאה ביצירת התגובה: {e}")
     else:
         st.warning(t['input_error'])
 
