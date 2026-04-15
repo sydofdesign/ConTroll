@@ -22,7 +22,7 @@ if 'history' not in st.session_state:
 if 'persona' not in st.session_state:
     st.session_state.persona = "The Savage (הציני)"
 
-# --- מילון תרגומים מעודכן ---
+# --- מילון תרגומים ---
 translations = {
     'Hebrew': {
         'dir': 'rtl', 'align': 'right',
@@ -112,16 +112,12 @@ with c3:
 
 st.markdown(f"<p style='text-align: center; color: #2E35C2;'>{t['chosen_label']} <b>{st.session_state.persona}</b></p>", unsafe_allow_html=True)
 
-# 2. רמה ושפת תגובה
+# 2. רמת תגובה
 st.markdown(f"<h2 style='text-align: center;'>{t['response_level']}</h2>", unsafe_allow_html=True)
-# כאן הוספתי את התרגום לכפתורי הרדיו
 intensity_labels = [t['mild'], t['spicy'], t['atomic']]
-intensity = st.radio("", intensity_labels, horizontal=True, label_visibility="collapsed")
+intensity = st.radio("intensity", intensity_labels, horizontal=True, label_visibility="collapsed")
 
-st.markdown(f"<p style='text-align: center; margin-top:10px; font-weight: bold;'>{t['target_lang']}</p>", unsafe_allow_html=True)
-target_lang = st.selectbox("", ["Hebrew", "English", "Arabic", "Russian"], label_visibility="collapsed")
-
-# 3. תוכן
+# 3. קונטקסט ותוכן
 st.markdown("---")
 st.markdown(f"<p style='text-align: {t['align']}; font-weight: bold;'>{t['context_label']}</p>", unsafe_allow_html=True)
 context_input = st.text_input("ctx", placeholder=t['context_ph'], label_visibility="collapsed")
@@ -130,6 +126,12 @@ st.markdown(f"<p style='text-align: {t['align']}; font-weight: bold;'>{t['troll_
 troll_input = st.text_area("troll", placeholder=t['troll_ph'], label_visibility="collapsed", height=100)
 
 uploaded_file = st.file_uploader(t['upload_label'], type=['png', 'jpg', 'jpeg'])
+
+# בחירת שפת תגובה - הועבר לכאן והפך לרדיו
+st.markdown(f"<p style='text-align: center; margin-top:20px; font-weight: bold;'>{t['target_lang']}</p>", unsafe_allow_html=True)
+target_lang = st.radio("target_lang", ["Hebrew", "English", "Arabic", "Russian"], horizontal=True, label_visibility="collapsed")
+
+st.write("") # רווח לפני הכפתור
 
 if st.button(t['fire_btn'], key="fire"):
     if troll_input:
