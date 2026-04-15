@@ -1,7 +1,6 @@
 import streamlit as st
 import google.generativeai as genai
 from PIL import Image
-import os
 
 # --- פונקציות עזר וטעינת CSS ---
 def local_css(file_name):
@@ -80,7 +79,7 @@ with col_lang_2:
 
 t = translations[st.session_state.lang]
 
-# הזרקת CSS
+# הזרקת CSS לכיווניות
 st.markdown(f"""
     <style>
     textarea, input {{ direction: {t['dir']} !important; text-align: {t['align']} !important; }}
@@ -88,12 +87,11 @@ st.markdown(f"""
     </style>
     """, unsafe_allow_html=True)
 
-# --- הגדרת AI (תיקון סופי בהחלט) ---
-API_KEY = "AIzaSyC1JvhUdZZxelkH09dDLl6b8HaEQTqK89A" 
+# --- הגדרת AI (תיקון גרסה ידני למניעת 404) ---
+API_KEY = "AIzaSyC1JvhUdZZxelkH09dDLl6b8HaEQTqK89A"
 genai.configure(api_key=API_KEY)
 
-# כאן אנחנו מגדירים את המודל בדרך העוקפת את ה-v1beta
-# שימוש בפורמט השם המלא models/gemini-1.5-flash
+# יצירת המודל עם שם מפורש
 model = genai.GenerativeModel('gemini-1.5-flash')
 
 PERSONAS = {
@@ -125,7 +123,7 @@ st.markdown(f"<h2 style='text-align: center;'>{t['response_level']}</h2>", unsaf
 intensity_labels = [t['mild'], t['spicy'], t['atomic']]
 intensity = st.radio("intensity", intensity_labels, horizontal=True, label_visibility="collapsed")
 
-# 3. קונטקסט ותוכן
+# 3. קונטקסט, לינק ותוכן
 st.markdown("---")
 st.markdown(f"<p style='text-align: {t['align']}; font-weight: bold;'>{t['context_label']}</p>", unsafe_allow_html=True)
 context_input = st.text_input("ctx", placeholder=t['context_ph'], label_visibility="collapsed")
@@ -148,36 +146,27 @@ if st.button(t['fire_btn'], key="fire"):
     if troll_input:
         with st.spinner(t['analyzing']):
             try:
-                # פרומפט פשוט ככל האפשר לבדיקה
-                prompt_text = (
-                    f"You are {st.session_state.persona}. "
-                    f"Intensity: {intensity}. "
-                    f"Troll wrote: {troll_input}. "
-                    f"Answer in {target_lang}."
+                # בניית הפרומפט
+                prompt = (
+                    f"Instruction: {PERSONAS[st.session_state.persona]}. "
+                    f"Intensity: {intensity}. Context: {context_input}. "
+                    f"Troll text: {troll_input}. "
+                    f"Target Language: {target_lang}."
                 )
                 
-                # יצירת תוכן
+                # תמיכה בתמונה
                 if uploaded_file:
                     img = Image.open(uploaded_file)
-                    response = model.generate_content([prompt_text, img])
+                    response = model.generate_content([prompt, img])
                 else:
-                    response = model.generate_content(prompt_text)
+                    response = model.generate_content(prompt)
                 
                 st.markdown("---")
                 st.markdown(f"### {t['result_title']}")
                 st.success(response.text)
                 st.session_state.history.insert(0, {"troll": troll_input, "response": response.text, "lang": target_lang})
             except Exception as e:
-                # הדפסת השגיאה המלאה לדיבוג
-                st.error(f"שגיאה טכנית: {str(e)}")
-                st.info("מנסה שיטה חלופית...")
-                # ניסיון אחרון עם מודל ישן יותר אם הכל נכשל
-                try:
-                    alt_model = genai.GenerativeModel('gemini-pro')
-                    response = alt_model.generate_content(prompt_text)
-                    st.success(response.text)
-                except:
-                    st.error("השירות של גוגל לא זמין כרגע. נסה שוב בעוד דקה.")
+                st.error(f"Error: {str(e)}")
     else:
         st.warning(t['input_error'])
 
