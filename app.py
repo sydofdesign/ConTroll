@@ -90,4 +90,4 @@ if st.button("NEUTRALIZE TROLL 🚀"):
 
 # פוטר
 st.markdown("<br><br><hr>", unsafe_allow_html=True)
-st.markdown("<p class='footer-text'>AM YISRAEL CHAI 🇮🇱</p>", unsafe_
+st.markdown("<p class='footer-text'>AM YISRAEL CHAI 🇮🇱</p>", unsafe_allow_html=True)
