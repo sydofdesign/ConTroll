@@ -68,7 +68,7 @@ translations = {
     }
 }
 
-# בורר שפת ממשק (UI)
+# בורר שפת ממשק
 col_lang_1, col_lang_2 = st.columns([4, 1])
 with col_lang_2:
     st.session_state.lang = st.selectbox(
@@ -79,7 +79,7 @@ with col_lang_2:
 
 t = translations[st.session_state.lang]
 
-# הזרקת CSS לכיווניות
+# הזרקת CSS
 st.markdown(f"""
     <style>
     textarea, input {{ direction: {t['dir']} !important; text-align: {t['align']} !important; }}
@@ -87,15 +87,31 @@ st.markdown(f"""
     </style>
     """, unsafe_allow_html=True)
 
-# --- הגדרת AI (תיקון השגיאה) ---
+# --- הגדרת AI (התיקון הסופי) ---
 API_KEY = "AIzaSyC1JvhUdZZxelkH09dDLl6b8HaEQTqK89A" 
 genai.configure(api_key=API_KEY)
 
-# פונקציה לבחירת מודל שקיים במערכת כדי למנוע 404
-def get_working_model():
-    return genai.GenerativeModel('gemini-1.5-flash')
+# פונקציה חכמה למציאת מודל זמין
+@st.cache_resource
+def get_model():
+    # רשימת שמות פוטנציאליים למודל לפי סדר עדיפות
+    potential_models = ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-pro']
+    
+    # בודק מה באמת זמין ב-API הספציפי שלך
+    try:
+        available_models = [m.name for m in genai.list_models() if 'generateContent' in m.supported_generation_methods]
+        for model_name in potential_models:
+            # ה-API לפעמים מחזיר שמות עם 'models/' ולפעמים בלי
+            for avail in available_models:
+                if model_name in avail:
+                    return genai.GenerativeModel(avail)
+    except:
+        # אם ה-list_models חסום, נלך על הכי בסיסי
+        return genai.GenerativeModel('gemini-pro')
+    
+    return genai.GenerativeModel('gemini-pro')
 
-model = get_working_model()
+model = get_model()
 
 PERSONAS = {
     "The Savage (הציני)": "Witty, cynical, biting sarcasm. Focus on logic or national failure.",
@@ -126,7 +142,7 @@ st.markdown(f"<h2 style='text-align: center;'>{t['response_level']}</h2>", unsaf
 intensity_labels = [t['mild'], t['spicy'], t['atomic']]
 intensity = st.radio("intensity", intensity_labels, horizontal=True, label_visibility="collapsed")
 
-# 3. קונטקסט, לינק ותוכן
+# 3. קונטקסט ותוכן
 st.markdown("---")
 st.markdown(f"<p style='text-align: {t['align']}; font-weight: bold;'>{t['context_label']}</p>", unsafe_allow_html=True)
 context_input = st.text_input("ctx", placeholder=t['context_ph'], label_visibility="collapsed")
@@ -149,14 +165,11 @@ if st.button(t['fire_btn'], key="fire"):
     if troll_input:
         with st.spinner(t['analyzing']):
             try:
-                # יצירת רשימת קלט למודל (תומך בטקסט ותמונה יחד)
                 input_data = []
-                
                 prompt_text = (
                     f"Instruction: {PERSONAS[st.session_state.persona]}. "
                     f"Intensity: {intensity}. Context: {context_input}. "
-                    f"Link: {post_link}. "
-                    f"Troll wrote: {troll_input}. "
+                    f"Link: {post_link}. Troll wrote: {troll_input}. "
                     f"IMPORTANT: Respond ONLY in {target_lang}."
                 )
                 input_data.append(prompt_text)
@@ -165,7 +178,6 @@ if st.button(t['fire_btn'], key="fire"):
                     img = Image.open(uploaded_file)
                     input_data.append(img)
                 
-                # שיגור השאילתה
                 response = model.generate_content(input_data)
                 
                 st.markdown("---")
@@ -173,7 +185,7 @@ if st.button(t['fire_btn'], key="fire"):
                 st.success(response.text)
                 st.session_state.history.insert(0, {"troll": troll_input, "response": response.text, "lang": target_lang})
             except Exception as e:
-                st.error(f"שגיאה ביצירת התגובה: {e}")
+                st.error(f"שגיאה: {str(e)}")
     else:
         st.warning(t['input_error'])
 
