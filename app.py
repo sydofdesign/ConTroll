@@ -14,11 +14,17 @@ def local_css(file_name):
 st.set_page_config(page_title="ConTroll", page_icon="logoCT.png", layout="centered")
 local_css("style.css")
 
-# אתחול Session State
-if 'history' not in st.session_state:
-    st.session_state.history = []
+# --- ניהול שפה (תיקון לוגי) ---
 if 'lang' not in st.session_state:
     st.session_state.lang = 'Hebrew'
+
+def change_lang():
+    # פונקציה זו מבטיחה שהשינוי יישמר
+    pass
+
+# אתחול היסטוריה ופרסונה
+if 'history' not in st.session_state:
+    st.session_state.history = []
 if 'persona' not in st.session_state:
     st.session_state.persona = "The Savage (הציני)"
 
@@ -33,7 +39,7 @@ translations = {
         'context_ph': 'למשל: ויכוח על המצור ב-X',
         'troll_label': 'מה הטרול כתב?',
         'troll_ph': 'הדביקו כאן את התגובה המטופשת שלהם',
-        'upload_label': 'העלה צילום מסך של הוויכוח (אופציונלי)',
+        'upload_label': 'העלה צילום מסך (אופציונלי)',
         'fire_btn': 'שגר הגנה! 🚀',
         'history_title': 'הטרלות אחרונות',
         'chosen_label': 'נבחר:',
@@ -51,7 +57,7 @@ translations = {
         'context_ph': 'e.g., Argument about the blockade on X',
         'troll_label': 'What did the troll write?',
         'troll_ph': 'Paste their stupid comment here...',
-        'upload_label': 'Upload a screenshot (Optional)',
+        'upload_label': 'Upload screenshot (Optional)',
         'fire_btn': 'FIRE DEFENSE! 🚀',
         'history_title': 'Recent ConTrolls',
         'chosen_label': 'Selected:',
@@ -62,26 +68,34 @@ translations = {
     }
 }
 
+# הצגת בורר השפה בראש הדף
+col_lang_1, col_lang_2 = st.columns([4, 1])
+with col_lang_2:
+    st.session_state.lang = st.selectbox(
+        "Language", 
+        ["Hebrew", "English"], 
+        index=0 if st.session_state.lang == 'Hebrew' else 1,
+        on_change=change_lang,
+        label_visibility="collapsed"
+    )
+
+# שליפת התרגום הנוכחי
 t = translations[st.session_state.lang]
+
+# הזרקת CSS לכיווניות (RTL/LTR)
+st.markdown(f"""
+    <style>
+    textarea, input {{ direction: {t['dir']} !important; text-align: {t['align']} !important; }}
+    .stMarkdown p {{ text-align: {t['align']} !important; direction: {t['dir']} !important; }}
+    </style>
+    """, unsafe_allow_html=True)
 
 # --- הגדרת AI ---
 API_KEY = "AIzaSyC1JvhUdZZxelkH09dDLl6b8HaEQTqK89A" 
 genai.configure(api_key=API_KEY)
 model = genai.GenerativeModel('gemini-1.5-flash')
 
-# הגדרת הפרסונות
-PERSONAS = {
-    "The Savage (הציני)": "You are a witty, cynical Israeli expert. Destroy trolls with biting sarcasm.",
-    "The Historian (הפרופסור)": "Expert in history. Correct lies with cold, hard facts about Israel.",
-    "The Theological Glitch (התיאולוג)": "Expert in Islam. Use Islamic sources to prove Jewish land rights."
-}
-
 # --- ממשק המשתמש ---
-
-# בורר שפה (Language Switcher)
-col_lang_1, col_lang_2 = st.columns([4, 1])
-with col_lang_2:
-    st.session_state.lang = st.selectbox("", ["Hebrew", "English"], label_visibility="collapsed")
 
 # לוגו
 st.image("logoCT.png", width=180)
@@ -91,15 +105,15 @@ st.markdown(f"<h2 style='text-align: center;'>{t['select_persona']}</h2>", unsaf
 col1, col2, col3 = st.columns(3)
 
 with col1:
-    st.markdown('<div class="persona-card">Image</div>', unsafe_allow_html=True)
+    st.markdown('<div class="persona-card">Savage</div>', unsafe_allow_html=True)
     if st.button("The Savage", use_container_width=True):
         st.session_state.persona = "The Savage (הציני)"
 with col2:
-    st.markdown('<div class="persona-card">Image</div>', unsafe_allow_html=True)
+    st.markdown('<div class="persona-card">Historian</div>', unsafe_allow_html=True)
     if st.button("The Historian", use_container_width=True):
         st.session_state.persona = "The Historian (הפרופסור)"
 with col3:
-    st.markdown('<div class="persona-card">Image</div>', unsafe_allow_html=True)
+    st.markdown('<div class="persona-card">Theology</div>', unsafe_allow_html=True)
     if st.button("The Theology", use_container_width=True):
         st.session_state.persona = "The Theological Glitch (התיאולוג)"
 
@@ -112,15 +126,12 @@ intensity = st.radio("", ["Mild", "Spicy", "Atomic"], horizontal=True, label_vis
 # 3. קונטקסט ותוכן
 st.markdown("---")
 st.markdown(f"<p style='text-align: {t['align']}; font-weight: bold;'>{t['context_label']}</p>", unsafe_allow_html=True)
-context_input = st.text_input("", placeholder=t['context_ph'], label_visibility="collapsed")
+context_input = st.text_input("ctx", placeholder=t['context_ph'], label_visibility="collapsed")
 
 st.markdown(f"<p style='text-align: {t['align']}; font-weight: bold;'>{t['troll_label']}</p>", unsafe_allow_html=True)
-troll_input = st.text_area("", placeholder=t['troll_ph'], label_visibility="collapsed", height=100)
+troll_input = st.text_area("troll", placeholder=t['troll_ph'], label_visibility="collapsed", height=100)
 
 uploaded_file = st.file_uploader(t['upload_label'], type=['png', 'jpg', 'jpeg'])
-
-# שליטה על כיווניות התיבה דרך CSS דינמי
-st.markdown(f"<style>textarea, input {{ direction: {t['dir']}; text-align: {t['align']}; }}</style>", unsafe_allow_html=True)
 
 # כפתור שיגור
 if st.button(t['fire_btn'], key="fire"):
