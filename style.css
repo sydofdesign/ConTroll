@@ -1,54 +1,125 @@
-/* מרכז את הכל */
-.block-container {
-    padding-top: 2rem;
-    text-align: center;
+/* הגדרות בסיס */
+.stApp {
+    background-color: #ffffff;
+    font-family: 'Inter', sans-serif;
 }
 
-/* עיצוב כרטיסי הפרסונה (הריבועים האפורים) */
-.persona-card {
-    background-color: #D9D9D9;
-    height: 180px;
+/* מרכז לוגו */
+[data-testid="stImage"] {
+    display: flex;
+    justify-content: center;
+}
+
+/* קרוסלת פרסונות */
+.persona-scroll-container {
+    display: flex;
+    overflow-x: auto;
+    gap: 15px;
+    padding: 10px 5px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    flex-direction: row;
+}
+
+.persona-scroll-container::-webkit-scrollbar {
+    display: none;
+}
+
+.persona-item {
+    min-width: 100px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.persona-circle {
+    width: 85px;
+    height: 85px;
+    background-color: #E1EFFF;
+    border-radius: 50%;
+    margin: 0 auto;
     display: flex;
     align-items: center;
     justify-content: center;
-    border-radius: 4px;
-    margin-bottom: 10px;
-    color: #333;
+    color: #2e35c2;
     font-weight: bold;
+    border: 3px solid transparent;
+    transition: 0.3s;
 }
 
-/* ביטול עיצוב ברירת המחדל של תיבת הטקסט כדי שתהיה נקייה */
-.stTextArea textarea {
-    border: 2px solid #2E35C2 !important;
-    border-radius: 15px !important;
-    text-align: right;
-    direction: rtl;
+.persona-circle.active {
+    border-color: #2e35c2;
+    background-color: #2e35c2;
+    color: white;
 }
 
-/* עיצוב כפתורי הרדיו (רמת תגובה) */
+.persona-name {
+    font-size: 0.85rem;
+    font-weight: bold;
+    margin-top: 8px;
+    color: #2e35c2;
+    white-space: nowrap;
+}
+
+.persona-desc {
+    font-size: 0.65rem;
+    color: #666;
+    margin-top: 2px;
+}
+
+/* רמות תגובה ושפות - כפתורים מרובעים */
 div[data-role="radiogroup"] {
+    display: flex;
     justify-content: center;
-    gap: 10px;
+    gap: 8px !important;
+    flex-wrap: wrap;
 }
 
 div[data-role="radiogroup"] label {
-    background-color: #E2E8F0 !important;
-    padding: 10px 20px !important;
-    border-radius: 5px !important;
-    color: #2E35C2 !important;
-    border: none !important;
+    background-color: white !important;
+    border: 1px solid #2e35c2 !important;
+    border-radius: 6px !important;
+    padding: 6px 12px !important;
+    color: #2e35c2 !important;
+    font-weight: 500 !important;
+    min-width: 80px;
+    text-align: center;
 }
 
-/* הכפתור הנבחר ברמה */
 div[data-role="radiogroup"] label[data-checked="true"] {
-    background-color: #2E35C2 !important;
+    background-color: #2e35c2 !important;
     color: white !important;
 }
 
-/* כותרות */
-h2 {
-    font-size: 2rem !important;
-    margin-top: 2rem !important;
-    margin-bottom: 1.5rem !important;
-    color: #000;
+/* תוויות קלט */
+.input-label {
+    text-align: right;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 5px;
+    margin-top: 15px;
+}
+
+/* תיבות טקסט */
+input, textarea {
+    border-radius: 10px !important;
+    border: 1px solid #B0D4FF !important;
+    background-color: #F9FCFF !important;
+}
+
+/* כפתור שיגור כחול גרדיאנט */
+.stButton button {
+    background: linear-gradient(90deg, #5D9FFF 0%, #2E35C2 100%) !important;
+    color: white !important;
+    border-radius: 10px !important;
+    height: 55px !important;
+    font-size: 1.1rem !important;
+    font-weight: bold !important;
+    border: none !important;
+    box-shadow: 0 4px 15px rgba(46, 53, 194, 0.3);
+}
+
+/* התאמה למובייל */
+@media (max-width: 600px) {
+    .persona-circle { width: 75px; height: 75px; }
+    h2 { font-size: 1.4rem !important; }
 }
