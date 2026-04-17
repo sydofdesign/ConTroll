@@ -1,89 +1,27 @@
-.stApp {
-    background-color: #ffffff;
-    direction: rtl;
+.stApp { background-color: white; direction: rtl; }
+.center-img { display: flex; justify-content: center; }
+h2 { text-align: center; color: #2e35c2; font-size: 1.2rem !important; }
+
+/* פרסונות */
+.p-circle, .active-circle {
+    width: 55px; height: 55px; border-radius: 50%;
+    margin: 0 auto; display: flex; align-items: center; justify-content: center;
+    font-size: 10px; transition: 0.3s;
+}
+.p-circle { background-color: #E1EFFF; color: #2e35c2; }
+.active-circle { background-color: #2e35c2; color: white; border: 2px solid #2e35c2; }
+
+/* כפתורי רדיו */
+div[data-role="radiogroup"] label {
+    background: white !important; border: 1px solid #2e35c2 !important;
+    border-radius: 6px !important; padding: 2px 8px !important; color: #2e35c2 !important;
 }
 
-/* קרוסלת פרסונות */
-.persona-scroll-container {
-    display: flex;
-    overflow-x: auto;
-    gap: 20px;
-    padding: 10px 0;
-    scrollbar-width: none;
-    -webkit-overflow-scrolling: touch;
-}
-
-.persona-scroll-container::-webkit-scrollbar {
-    display: none;
-}
-
-.persona-item {
-    min-width: 100px;
-    text-align: center;
-    flex-shrink: 0;
-}
-
-.circle-box {
-    width: 75px;
-    height: 75px;
-    border-radius: 50%;
-    margin: 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 13px;
-    transition: 0.3s;
-}
-
-.active-circle {
-    background-color: #2e35c2;
-    color: white;
-    border: 3px solid #2e35c2;
-}
-
-.inactive-circle {
-    background-color: #E1EFFF;
-    color: #2e35c2;
-}
-
-.persona-name {
-    font-weight: bold;
-    font-size: 0.85rem;
-    color: #2e35c2;
-    margin-top: 5px;
-}
-
-.persona-desc {
-    font-size: 0.65rem;
-    opacity: 0.7;
-}
-
-/* עיצוב אינפוטים */
-.input-label {
-    text-align: right;
-    font-weight: bold;
-    margin-top: 15px;
-    color: #333;
-}
-
-input, textarea {
-    border-radius: 10px !important;
-    border: 1px solid #d1e3ff !important;
-}
-
-/* כפתור */
+/* כפתור ראשי */
 .stButton button {
     background: linear-gradient(90deg, #5D9FFF 0%, #2E35C2 100%) !important;
-    color: white !important;
-    border-radius: 12px !important;
-    height: 50px;
-    border: none !important;
+    color: white !important; border-radius: 10px !important; height: 45px; border: none !important;
 }
 
-/* רדיו מרובע */
-div[data-role="radiogroup"] label {
-    background: white !important;
-    border: 1px solid #2e35c2 !important;
-    border-radius: 6px !important;
-    padding: 5px 10px !important;
-}
+/* יישור לימין */
+input, textarea { direction: rtl !important; text-align: right !important; }
